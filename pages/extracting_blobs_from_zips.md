@@ -23,7 +23,9 @@ You may also have a payload-based OTA, which is what your device will use if it 
 
 ## Extracting proprietary blobs from block-based OTAs
 
-Some block-based OTAs are split in to two files, one for the system partition and the other for the vendor partition.  You can verify if yours is split by looking for the `vendor.transfer.list` file in the root of the installable LinageOS zip.
+Some block-based OTAs are split in to multiple files, for the system partition and the other partitions like vendor, product, oem, odm and others.  You can verify if yours is split by looking for the corresponding `*.transfer.list` files for each in the root of the installable LinageOS zip.
+
+If you have a split block-based OTA file then you will need to extract, decompress and convert each one in a similar manner to system and vendor as outlined below.
 
 If you do not have a split OTA file, you may skip any step that references `vendor.transfer.list` and `vendor.new.dat.br` or `vendor.new.dat`
 
@@ -41,21 +43,21 @@ unzip path/to/lineage-*.zip system.transfer.list system.new.dat*
 ```
 where `path/to/` is the path to the installable zip.
 
-If your OTA includes `vendor.transfer.list` and `vendor.new.dat.br` or `vendor.new.dat`, extract them from the installable LineageOS zip as well:
+If your OTA includes `vendor.transfer.list` and `vendor.new.dat.br` or `vendor.new.dat` (other others), extract them from the installable LineageOS zip as well:
 
 ```
 unzip path/to/lineage-*.zip vendor.transfer.list vendor.new.dat*
 ```
 where `path/to/` is the path to the installable zip.
 
-In the case of `system.new.dat.br`/`vendor.new.dat.br` (a [brotli](https://en.wikipedia.org/wiki/Brotli) archive) exists, you will first need to decompress them using the `brotli` utility:
+In the case of `system.new.dat.br`/`vendor.new.dat.br`/etc. (a [brotli](https://en.wikipedia.org/wiki/Brotli) archive) exists, you will first need to decompress them using the `brotli` utility:
 
 ```
 sudo apt-get install brotli
 brotli --decompress --output=system.new.dat system.new.dat.br
 ```
 
-And if you have a `vendor.dat.new.br` file:
+And if you have a `vendor.dat.new.br` (or others) file:
 
 ```
 brotli --decompress --output=vendor.new.dat vendor.new.dat.br
@@ -73,7 +75,7 @@ Once you have obtained `sdat2img`, use it to extract the system image:
 python sdat2img/sdat2img.py system.transfer.list system.new.dat system.img
 ```
 
-And if you have a `vendor.dat.new` file:
+And if you have a `vendor.dat.new` (or others) file:
 
 ```
 python sdat2img/sdat2img.py vendor.transfer.list vendor.new.dat vendor.img
@@ -93,6 +95,8 @@ sudo rm system/vendor
 sudo mkdir system/vendor
 sudo mount vendor.img system/vendor/
 ```
+
+You must also now mount any other image files that you have in their respective directories.
 
 After you have mounted the image(s), move to the root directory of the sources of your device and run `extract-files.sh` as follows:
 
@@ -115,12 +119,10 @@ sudo umount ~/android/system_dump/system
 
 ```
 
-Finally delete the no longer needed files:
+Finally, unmount any other images before deleting the no longer needed files:
 
 ``` 
 rm -rf ~/android/system_dump/
-
-
 ```
 
 ## Extracting proprietary blobs from file-based OTAs
